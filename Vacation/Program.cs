@@ -1,242 +1,92 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 
-
-public class TripDetails
+namespace Vacation
 {
-
-    public static void Main(String[] args)
+    public class Vacation
     {
 
-        Console.WriteLine(Solution.solution(2014, "April", "May", "Wednesday") + " weeks");
-
-    }
-
-}
-
-class MyCalendar
-{
-
-    // To store numeric values
-
-    private int day, month, year;
-
-    private int dayOfYear; // it will be in range from 0 to 6 ( Signifying Sunday to Saturday
-
-    private static int[] numDays = {
-
-31,
-
-28,
-
-31,
-
-30,
-
-31,
-
-30,
-
-31,
-
-31,
-
-30,
-
-31,
-
-30,
-
-31
-
-};
-
-    public MyCalendar(int dayOfYear, int year)
-    {
-
-        day = 1;
-
-        month = 0; // January
-
-        this.year = year;
-
-        this.dayOfYear = dayOfYear;
-
-    }
-
-    // check if a year is leap year or not
-
-    private static bool isLeapYear(int year)
-    {
-
-        return ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0);
-
-    }
-
-    private static int getDays(int month, int year)
-    {
-
-        if (isLeapYear(year) && month == 1)
-        { // Feb
-
-            return numDays[month] + 1;
-
-        }
-        else
+        public int vacation(int year, string startMonth, string endMonth, string startDay)
         {
+            int[] days = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+            string[] months = { "January", "February", "March",
+                "April", "May", "June", "July", "August", "September", "October", "November", "December" };
+            string[] weekDay = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
 
-            return numDays[month];
-
-        }
-
-    }
-
-    public void advance()
-    {
-
-        dayOfYear = (dayOfYear + 1) % 7;
-
-        day++;
-
-        int maxDaysInMonth = getDays(month, year);
-
-        // if it was last day of month, then increment the month
-
-        if (day > maxDaysInMonth)
-        {
-
-            day = 1;
-
-            month++;
-
-            // if it was 31st december, we need to change year also
-
-            if (month > 12)
+            
+            if (LeapYear(year))
             {
-
-                month = 0;
-
-                year++;
-
+                days[1] = 29;
             }
 
+            
+            int minus = 0;
+            for (int i = 0; i < weekDay.Length; i++)
+            {
+                if (weekDay[i] == startDay && i != 0)
+                {
+                    minus = i - 7;
+                }
+            }
+            int daysNot = minus;
+            bool start = false;
+            int daysStart = 0;
+
+            //Count Days for not in vacation and vacation duration
+            for (int i = 0; i < months.Length; i++)
+            {
+                if (endMonth == months[i])
+                {
+                    daysStart += days[i];
+                    break;
+                }
+                else if (start || startMonth == months[i])
+                {
+                    start = true;
+                    daysStart += days[i];
+                }
+                else
+                {
+                    daysNot += days[i];
+                }
+            }
+
+            //Takes the days not in vacation to detect any changes away from set day Monday
+            int dayBeforeVacation = daysNot % 7;
+            //If Not Monday
+            if (dayBeforeVacation != 0)
+            {
+                dayBeforeVacation -= 7;
+            }
+            //remove excess days before monday.
+            daysStart += dayBeforeVacation;
+
+            //reset day for detecting Sunday. Add 1 back in at the end.
+            daysStart -= 6;
+            int weeks = (daysStart / 7); //Detects only number of sundays.
+            return weeks + 1; // Add the week back in
         }
-
-    }
-
-    public int getMonthIndex()
-    {
-
-        return month;
-
-    }
-
-    public int getDayOfMonthIndex()
-    {
-
-        return dayOfYear;
-
-    }
-
-    public override String ToString()
-    {
-
-        return "MyCalendar [\nday: " + day + "\nmonth: " + month + "\nyear: " + year + "\ndayOfYear: " + dayOfYear +
-
-        "]";
-
-    }
-
-}
-
-class Solution
-{
-
-    private static String[] Months = {
-
-"January",
-
-"February",
-
-"March",
-
-"April",
-
-"May",
-
-"June",
-
-"July",
-
-"August",
-
-"September",
-
-"October",
-
-"November",
-
-"December"
-
-};
-
-    private static String[] days = {
-
-"Sunday",
-
-"Monday",
-
-"Tuesday",
-
-"Wednesday",
-
-"Thursday",
-
-"Friday",
-
-"Saturday"
-
-};
-
-    public static int solution(int year, String beginningMonth,
-
-    String endMonth, String startDayOfYear)
-    {
-
-        MyCalendar calendar = new MyCalendar(Array.IndexOf(days, startDayOfYear), year);
-
-        int startMonthIndex = Array.IndexOf(Months, beginningMonth);
-
-        int endMonthIndex = Array.IndexOf(Months, endMonth);
-
-        // Reach to the date on which journey will start
-
-        while ((calendar.getMonthIndex() != startMonthIndex) ||
-
-        (!String.Equals(days[calendar.getDayOfMonthIndex()].ToLower(), "monday")))
+        public bool LeapYear(int year)
         {
-
-            calendar.advance();
-
+            if (year % 4 == 0) return true;
+            else return false;
         }
 
-        int numDaysSpent = 0;
-
-        while (calendar.getMonthIndex() <= endMonthIndex)
-        {
-
-            numDaysSpent++;
-
-            calendar.advance();
-
-        }
-
-        // We can divide the days spent by 7 to get weeks
-
-        return numDaysSpent / 7;
 
     }
 
-}
+        class Program
+        {
+            public static void Main(string[] args)
+            {
+                Vacation vacation = new Vacation();
+                Console.WriteLine(vacation.vacation(2024, "April", "August", "Wednesday"));
+            }
+        }
+    }
 
 
